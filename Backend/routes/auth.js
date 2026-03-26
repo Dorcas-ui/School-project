@@ -1,7 +1,12 @@
 // routes/auth.js
 const express = require('express');
-const { register, login } = require('../controllers/authController');
 const router = express.Router(); 
+const { register, login, requestReset, resetPassword } = require('../controllers/authController');
+
+// Password Reset
+router.post('/request-reset', requestReset);
+router.post('/reset-password', resetPassword);
+
 
 // Register
 router.post('/register', register);
