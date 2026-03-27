@@ -30,25 +30,22 @@ function App() {
           <span className="text-white text-2xl font-extrabold tracking-wide drop-shadow-lg">UIMS Portal</span>
         </div>
         <ul className="flex space-x-6 items-center">
-          <li><Link to="/" className="text-white font-semibold hover:text-yellow-300 transition">About Us</Link></li>
-          <li><Link to="/dashboard" className="text-white font-semibold hover:text-yellow-300 transition">Dashboard</Link></li>
-          <li><Link to="/payment" className="text-white font-semibold hover:text-yellow-300 transition">Payment</Link></li>
-          <li><Link to="/chatbot" className="text-white font-semibold hover:text-yellow-300 transition">Chatbot</Link></li>
-            {!isLoggedIn ? (
-              <>
-                <li><Link to="/login" className="bg-yellow-300 text-blue-900 font-bold px-4 py-1 rounded-full shadow hover:bg-yellow-400 transition">Login</Link></li>
-                <li><Link to="/register" className="bg-blue-300 text-blue-900 font-bold px-4 py-1 rounded-full shadow hover:bg-blue-400 transition">Register</Link></li>
-              </>
-            ) : (
-              <li>
-                <button
-                  onClick={handleLogout}
-                  className="bg-red-400 text-white font-bold px-4 py-1 rounded-full shadow hover:bg-red-500 transition"
-                >
-                  Logout
-                </button>
-              </li>
-            )}
+          <li><Link to="/dashboard" className="bg-red-400 text-white font-bold px-4 py-1 rounded-full shadow hover:bg-red-500 transition">Dashboard</Link></li>
+          {!isLoggedIn ? (
+            <>
+              <li><Link to="/login" className="bg-yellow-300 text-blue-900 font-bold px-4 py-1 rounded-full shadow hover:bg-yellow-400 transition">Login</Link></li>
+              <li><Link to="/register" className="bg-blue-300 text-blue-900 font-bold px-4 py-1 rounded-full shadow hover:bg-blue-400 transition">Register</Link></li>
+            </>
+          ) : (
+            <li>
+              <button
+                onClick={handleLogout}
+                className="bg-red-400 text-white font-bold px-4 py-1 rounded-full shadow hover:bg-red-500 transition"
+              >
+                Logout
+              </button>
+            </li>
+          )}
         </ul>
       </nav>
       {/* Main Content */}
