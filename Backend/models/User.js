@@ -9,6 +9,7 @@ const userSchema = new mongoose.Schema
   role: { type: String, enum: ['customer', 'admin'], default: 'customer' },
   wifiUsername: { type: String },
   wifiPassword: { type: String },
+  wifiPackage: { type: String, enum: ['Buffalo', 'Elephant', 'Rhino', 'Lion', 'Leopard'], default: 'Buffalo' },
   balance: { type: Number, default: 0 },
   createdAt: { type: Date, default: Date.now },
 });

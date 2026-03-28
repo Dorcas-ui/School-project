@@ -4,10 +4,10 @@ const auth = require('../middleware/auth');
 const { initiateStkPush } = require('../controllers/paymentController');
 const { handleCallback } = require('../controllers/paymentController');
 
-// @route   POST /api/payment/stkpush
-// @desc    Initiate M-PESA STK Push payment
-// @access  Private (user must be logged in)
-router.post('/stkpush', auth, initiateStkPush);
+// @route   POST /api/payment/stk
+// @desc    Initiate M-PESA STK Push payment (alias for /stkpush)
+// @access  Private
+router.post('/stk', auth, initiateStkPush);
 
 // @route   POST /api/payment/callback
 // @desc    Handle M-PESA payment callback from Safaricom

@@ -1,15 +1,23 @@
 import AboutUs from './pages/AboutUs';
 import Dashboard from './pages/Dashboard';
-import Payment from './pages/Payment';
+// Removed Payment import; using PaymentActions instead
 import Chatbot from './pages/Chatbot';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
+import WifiManagement from './pages/WifiManagement';
+import WifiActions from './pages/WifiActions';
+import WifiUpdate from './pages/WifiUpdate';
+import WifiReboot from './pages/WifiReboot';
 import { Routes, Route, Link, useNavigate } from 'react-router-dom';
 import './App.css';
 
 import ProtectedRoute from './ProtectedRoute';
+import PaymentActions from './pages/PaymentActions';
+import MyBalance from './pages/MyBalance';
+import MakePayment from './pages/MakePayment';
+import Profile from './pages/Profile';
 
 function App() {
   // Helper to check if user is logged in
@@ -60,9 +68,24 @@ function App() {
             <Dashboard />
           </ProtectedRoute>
         } />
-        <Route path="/payment" element={
+          <Route path="/payment" element={
+            <ProtectedRoute>
+              <PaymentActions />
+            </ProtectedRoute>
+          } />
+        <Route path="/payment/actions" element={
           <ProtectedRoute>
-            <Payment />
+            <PaymentActions />
+          </ProtectedRoute>
+        } />
+        <Route path="/payment/balance" element={
+          <ProtectedRoute>
+            <MyBalance />
+          </ProtectedRoute>
+        } />
+        <Route path="/payment/make" element={
+          <ProtectedRoute>
+            <MakePayment />
           </ProtectedRoute>
         } />
         <Route path="/chatbot" element={
@@ -74,6 +97,57 @@ function App() {
         <Route path="/register" element={<Register />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
+        <Route path="/wifi-management" element={<WifiManagement />} />
+        <Route path="/wifi" element={
+          <ProtectedRoute>
+            <WifiActions />
+          </ProtectedRoute>
+        } />
+        <Route path="/wifi/update" element={
+          <ProtectedRoute>
+            <WifiUpdate />
+          </ProtectedRoute>
+        } />
+        <Route path="/wifi/reboot" element={
+          <ProtectedRoute>
+            <WifiReboot />
+          </ProtectedRoute>
+        } />
+        <Route path="/wifi-actions" element={
+          <ProtectedRoute>
+            <WifiActions />
+          </ProtectedRoute>
+        } />
+        <Route path="/wifi-update" element={
+          <ProtectedRoute>
+            <WifiUpdate />
+          </ProtectedRoute>
+        } />
+        <Route path="/wifi-reboot" element={
+          <ProtectedRoute>
+            <WifiReboot />
+          </ProtectedRoute>
+        } />
+        <Route path="/payment-actions" element={
+          <ProtectedRoute>
+            <PaymentActions />
+          </ProtectedRoute>
+        } />
+        <Route path="/my-balance" element={
+          <ProtectedRoute>
+            <MyBalance />
+          </ProtectedRoute>
+        } />
+        <Route path="/make-payment" element={
+          <ProtectedRoute>
+            <MakePayment />
+          </ProtectedRoute>
+        } />
+        <Route path="/profile" element={
+          <ProtectedRoute>
+            <Profile />
+          </ProtectedRoute>
+        } />
       </Routes>
     </div>
   );
