@@ -1,12 +1,14 @@
 const axios = require('axios');
 require('dotenv').config();
+const User = require('../models/User'); 
 
-// Get access token from Safaricom Daraja API
+// get access token from safaricom daraja API
 exports.getAccessToken = async () => {
-  const consumerKey = process.env.DARAJA_CONSUMER_KEY;
-  const consumerSecret = process.env.DARAJA_CONSUMER_SECRET;
-  const auth = Buffer.from(`${consumerKey}:${consumerSecret}`).toString('base64');
   try {
+    const consumerKey = process.env.DARAJA_CONSUMER_KEY;
+    const consumerSecret = process.env.DARAJA_CONSUMER_SECRET;
+    const auth = Buffer.from(`${consumerKey}:${consumerSecret}`).toString('base64');
+
     const response = await axios.get(
       'https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials',
       {
@@ -15,6 +17,7 @@ exports.getAccessToken = async () => {
         },
       }
     );
+
     return response.data.access_token;
   } catch (err) {
     console.error('Error getting access token:', err.response?.data || err.message);
@@ -22,26 +25,34 @@ exports.getAccessToken = async () => {
   }
 };
 
-// Initiate STK Push
+//initiate stk push (sandbox)
 exports.initiateStkPush = async (req, res) => {
   try {
     const accessToken = await exports.getAccessToken();
     const { phone, amount, accountReference, description } = req.body;
+
+    // Ensure phone is in sandbox format
+    const formattedPhone = phone.startsWith('254') ? phone : `254${phone.slice(-9)}`;
+
+    const timestamp = getTimestamp();
+    const password = Buffer.from(
+      process.env.DARAJA_SHORTCODE + process.env.DARAJA_PASSKEY + timestamp
+    ).toString('base64');
+
     const payload = {
       BusinessShortCode: process.env.DARAJA_SHORTCODE,
-      Password: Buffer.from(
-        process.env.DARAJA_SHORTCODE + process.env.DARAJA_PASSKEY + getTimestamp()
-      ).toString('base64'),
-      Timestamp: getTimestamp(),
+      Password: password,
+      Timestamp: timestamp,
       TransactionType: 'CustomerPayBillOnline',
       Amount: amount,
-      PartyA: phone,
+      PartyA: formattedPhone,
       PartyB: process.env.DARAJA_SHORTCODE,
-      PhoneNumber: phone,
+      PhoneNumber: formattedPhone,
       CallBackURL: process.env.DARAJA_CALLBACK_URL,
       AccountReference: accountReference,
       TransactionDesc: description,
     };
+
     const response = await axios.post(
       'https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest',
       payload,
@@ -51,33 +62,34 @@ exports.initiateStkPush = async (req, res) => {
         },
       }
     );
+
     res.json(response.data);
   } catch (err) {
     console.error('STK Push error:', err.response?.data || err.message);
-    res.status(500).json({ message: 'Payment initiation failed', error: err.message });
+    res.status(500).json({ message: 'Payment initiation failed', error: err.response?.data || err.message });
   }
 };
 
-// Callback handler for M-PESA payment result
+//callback URL must be publicly accessible (use ngrok for local testing)
 exports.handleCallback = async (req, res) => {
   try {
     const callbackData = req.body;
     console.log('M-PESA Callback received:', JSON.stringify(callbackData, null, 2));
-    // Check if payment was successful
+
     const resultCode = callbackData?.Body?.stkCallback?.ResultCode;
+
     if (resultCode === 0) {
-      // Payment successful
       const metadata = callbackData.Body.stkCallback.CallbackMetadata;
       let paidAmount = 0;
       let accountReference = '';
-      // Extract amount and account reference
+
       if (metadata && metadata.Item) {
         for (const item of metadata.Item) {
           if (item.Name === 'Amount') paidAmount = item.Value;
           if (item.Name === 'AccountReference') accountReference = item.Value;
         }
       }
-      // Find user by account reference and update balance
+
       if (accountReference && paidAmount > 0) {
         const user = await User.findOne({ accountNumber: accountReference });
         if (user) {
@@ -89,6 +101,7 @@ exports.handleCallback = async (req, res) => {
         }
       }
     }
+
     res.status(200).json({ message: 'Callback received' });
   } catch (err) {
     console.error('Callback handler error:', err.message);
@@ -96,15 +109,14 @@ exports.handleCallback = async (req, res) => {
   }
 };
 
-// Helper to get timestamp in YYYYMMDDHHmmss
+// get timestamp in YYYYMMDDHHmmss (UTC)
 function getTimestamp() {
   const date = new Date();
-  return (
-    date.getFullYear().toString() +
-    String(date.getMonth() + 1).padStart(2, '0') +
-    String(date.getDate()).padStart(2, '0') +
-    String(date.getHours()).padStart(2, '0') +
-    String(date.getMinutes()).padStart(2, '0') +
-    String(date.getSeconds()).padStart(2, '0')
-  );
+  const yyyy = date.getUTCFullYear();
+  const mm = String(date.getUTCMonth() + 1).padStart(2, '0');
+  const dd = String(date.getUTCDate()).padStart(2, '0');
+  const hh = String(date.getUTCHours()).padStart(2, '0');
+  const min = String(date.getUTCMinutes()).padStart(2, '0');
+  const ss = String(date.getUTCSeconds()).padStart(2, '0');
+  return `${yyyy}${mm}${dd}${hh}${min}${ss}`;
 }
