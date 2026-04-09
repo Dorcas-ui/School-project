@@ -1,10 +1,11 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 
-export default function Register() {
-  const [name, setName] = useState('');
-  const [accountNumber, setAccountNumber] = useState('');
-  const [password, setPassword] = useState('');
+export default function AdminResetPassword() {
+  const location = useLocation();
+  const [email, setEmail] = useState(location.state?.email || '');
+  const [resetCode, setResetCode] = useState(location.state?.resetCode || '');
+  const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
@@ -16,33 +17,32 @@ export default function Register() {
     e.preventDefault();
     setError('');
     setSuccess('');
-    if (!name || !accountNumber || !password || !confirmPassword) {
+    if (!email || !resetCode || !newPassword || !confirmPassword) {
       setError('Please fill in all fields.');
       return;
     }
-    // Password strength validation
     const strongPassword = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]).{8,}$/;
-    if (!strongPassword.test(password)) {
+    if (!strongPassword.test(newPassword)) {
       setError('Password must be at least 8 characters and include uppercase, lowercase, number, and special character.');
       return;
     }
-    if (password !== confirmPassword) {
+    if (newPassword !== confirmPassword) {
       setError('Passwords do not match.');
       return;
     }
     setLoading(true);
     try {
-      const res = await fetch('/api/auth/register', {
+      const res = await fetch('/api/adminResetPassword', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, accountNumber, password })
+        body: JSON.stringify({ email, resetCode, newPassword })
       });
       const data = await res.json();
       if (!res.ok) {
-        setError(data.message || 'Registration failed');
+        setError(data.message || 'Password reset failed');
       } else {
-        setSuccess('Registration successful! You can now log in.');
-        setTimeout(() => navigate('/login'), 1500);
+        setSuccess('Password reset successful! You can now log in.');
+        setTimeout(() => navigate('/adminLogin'), 2000);
       }
     } catch (err) {
       setError('Network error. Please try again.');
@@ -53,42 +53,41 @@ export default function Register() {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-[70vh]">
-      <div className="w-full max-w-md bg-white rounded-xl shadow-lg p-8 border-t-8 border-blue-400">
-        <h2 className="text-3xl font-bold text-blue-600 mb-4 text-center">Customer Registration</h2>
-        <p className="text-center text-gray-500 mb-4">This form is for customers only. Admins should use the Admin Registration page.</p>
+      <div className="w-full max-w-md bg-white rounded-xl shadow-lg p-8 border-t-8 border-yellow-400">
+        <h2 className="text-3xl font-bold text-yellow-600 mb-4 text-center">Admin Reset Password</h2>
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <label className="block text-gray-700 font-semibold mb-1" htmlFor="name">Full Name</label>
+            <label className="block text-gray-700 font-semibold mb-1" htmlFor="email">Email</label>
             <input
-              id="name"
-              type="text"
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
-              value={name}
-              onChange={e => setName(e.target.value)}
+              id="email"
+              type="email"
+              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400"
+              value={email}
+              onChange={e => setEmail(e.target.value)}
               required
               disabled={loading}
             />
           </div>
           <div>
-            <label className="block text-gray-700 font-semibold mb-1" htmlFor="accountNumber">Account Number</label>
+            <label className="block text-gray-700 font-semibold mb-1" htmlFor="resetCode">Reset Code</label>
             <input
-              id="accountNumber"
+              id="resetCode"
               type="text"
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
-              value={accountNumber}
-              onChange={e => setAccountNumber(e.target.value)}
+              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400"
+              value={resetCode}
+              onChange={e => setResetCode(e.target.value)}
               required
               disabled={loading}
             />
           </div>
           <div>
-            <label className="block text-gray-700 font-semibold mb-1" htmlFor="password">Password</label>
+            <label className="block text-gray-700 font-semibold mb-1" htmlFor="newPassword">New Password</label>
             <input
-              id="password"
+              id="newPassword"
               type={showPassword ? 'text' : 'password'}
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
-              value={password}
-              onChange={e => setPassword(e.target.value)}
+              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400"
+              value={newPassword}
+              onChange={e => setNewPassword(e.target.value)}
               required
               disabled={loading}
             />
@@ -98,7 +97,7 @@ export default function Register() {
             <input
               id="confirmPassword"
               type={showPassword ? 'text' : 'password'}
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400"
               value={confirmPassword}
               onChange={e => setConfirmPassword(e.target.value)}
               required
@@ -120,10 +119,10 @@ export default function Register() {
           {success && <div className="text-green-600 text-sm text-center">{success}</div>}
           <button
             type="submit"
-            className="w-full bg-blue-400 hover:bg-blue-500 text-white font-bold py-2 rounded-lg shadow transition disabled:opacity-60"
+            className="w-full bg-yellow-400 hover:bg-yellow-500 text-blue-900 font-bold py-2 rounded-lg shadow transition disabled:opacity-60"
             disabled={loading}
           >
-            {loading ? 'Registering...' : 'Register'}
+            {loading ? 'Resetting...' : 'Reset Password'}
           </button>
         </form>
       </div>

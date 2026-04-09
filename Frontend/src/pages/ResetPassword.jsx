@@ -2,8 +2,9 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 export default function ResetPassword() {
-  const [accountNumber, setAccountNumber] = useState('');
-  const [resetCode, setResetCode] = useState('');
+  // Autofill from localStorage if available
+  const [accountNumber, setAccountNumber] = useState(() => localStorage.getItem('resetAccountNumber') || '');
+  const [resetCode, setResetCode] = useState(() => localStorage.getItem('resetCode') || '');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -13,6 +14,9 @@ export default function ResetPassword() {
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
+    // Clear autofill after submit
+    localStorage.removeItem('resetCode');
+    localStorage.removeItem('resetAccountNumber');
     e.preventDefault();
     setError('');
     setSuccess('');

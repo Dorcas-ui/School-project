@@ -41,7 +41,7 @@ export default function Dashboard() {
         <DashboardCard
           title="About Us"
           description="Learn more about our platform."
-          to="/"
+          to="/about-us"
           icon="ℹ️"
         />
       </div>

@@ -1,17 +1,55 @@
 const mongoose = require('mongoose');
 
-const userSchema = new mongoose.Schema
-({
+const userSchema = new mongoose.Schema({
   name: { type: String, required: true },
-  accountNumber: { type: String, required: true, unique: true },
-  password: { type: String, required: true },
-  phone: { type: String },
-  role: { type: String, enum: ['customer', 'admin'], default: 'customer' },
-  wifiUsername: { type: String },
-  wifiPassword: { type: String },
-  wifiPackage: { type: String, enum: ['Buffalo', 'Elephant', 'Rhino', 'Lion', 'Leopard'], default: 'Buffalo' },
-  balance: { type: Number, default: 0 },
+
+  // Only required for clients
+  accountNumber: {
+    type: String,
+    unique: true,
+    sparse: true,
+    required: function () { return this.role === 'user'; },
+    default: undefined // Prevents duplicate nulls for admins
+  },
+
+  // Only required for admins
+  email: {
+    type: String,
+    unique: true,
+    sparse: true,
+    required: function () { return this.role === 'admin'; }
+  },
+
+  password: {
+    type: String,
+    required: function () { return this.role === 'admin'; }
+  },
+
+  phone: {
+  type: String,
+  required: function () { return this.role === 'user'; }
+},
+
+  // Only required for clients
+  wifiPackage: {
+    type: String,
+    enum: ['Buffalo', 'Elephant', 'Rhino', 'Lion', 'Leopard', ''],
+    default: '',
+    required: function () { return this.role === 'user'; }
+  },
+
+  location: { type: String, default: '' },
+
+  role: {
+    type: String,
+    enum: ['user', 'admin'],
+    required: true
+  },
+
   createdAt: { type: Date, default: Date.now },
+
+  // Flag for main admin
+  isMainAdmin: { type: Boolean, default: false }
 });
 
 module.exports = mongoose.model('User', userSchema);

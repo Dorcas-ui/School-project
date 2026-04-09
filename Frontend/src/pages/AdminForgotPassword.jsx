@@ -1,48 +1,42 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-export default function ForgotPassword() {
-  const [accountNumber, setAccountNumber] = useState('');
+export default function AdminForgotPassword() {
+  const [email, setEmail] = useState('');
   const [name, setName] = useState('');
   const [success, setSuccess] = useState('');
+  const [resetCode, setResetCode] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setSuccess('');
-
-    if (!accountNumber || !name) {
-      setError('Please enter both account number and full name.');
+    setResetCode('');
+    if (!email || !name) {
+      setError('Please enter both email and full name.');
       return;
     }
-
     setLoading(true);
-
     try {
-      const res = await fetch('/api/auth/request-reset', {
+      const res = await fetch('/api/adminRequestReset', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ accountNumber, name }),
+        body: JSON.stringify({ email, name })
       });
-
       const data = await res.json();
-
       if (!res.ok) {
         setError(data.message || 'Reset request failed');
       } else {
-        // Store reset code and account number for autofill
-        if (data.code) {
-          localStorage.setItem('resetCode', data.code);
-        }
-        if (accountNumber) {
-          localStorage.setItem('resetAccountNumber', accountNumber);
-        }
         setSuccess('If your details are correct, you will receive a reset code.');
-        setTimeout(() => navigate('/reset-password'), 2000);
+        if (data.code) {
+          setResetCode(data.code); // Demo mode: show code
+          setTimeout(() => {
+            navigate('/adminResetPassword', { state: { email, resetCode: data.code } });
+          }, 1200);
+        }
       }
     } catch (err) {
       setError('Network error. Please try again.');
@@ -54,60 +48,35 @@ export default function ForgotPassword() {
   return (
     <div className="flex flex-col items-center justify-center min-h-[70vh]">
       <div className="w-full max-w-md bg-white rounded-xl shadow-lg p-8 border-t-8 border-yellow-400">
-        <h2 className="text-3xl font-bold text-yellow-600 mb-4 text-center">
-          Forgot Password
-        </h2>
-
+        <h2 className="text-3xl font-bold text-yellow-600 mb-4 text-center">Admin Forgot Password</h2>
         <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Account Number */}
           <div>
-            <label
-              className="block text-gray-700 font-semibold mb-1"
-              htmlFor="accountNumber"
-            >
-              Account Number
-            </label>
+            <label className="block text-gray-700 font-semibold mb-1" htmlFor="email">Email</label>
             <input
-              id="accountNumber"
-              type="text"
+              id="email"
+              type="email"
               className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400"
-              value={accountNumber}
-              onChange={(e) => setAccountNumber(e.target.value)}
+              value={email}
+              onChange={e => setEmail(e.target.value)}
               required
               disabled={loading}
             />
           </div>
-
-          {/* Full Name */}
           <div>
-            <label
-              className="block text-gray-700 font-semibold mb-1"
-              htmlFor="name"
-            >
-              Full Name
-            </label>
+            <label className="block text-gray-700 font-semibold mb-1" htmlFor="name">Full Name</label>
             <input
               id="name"
               type="text"
               className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400"
               value={name}
-              onChange={(e) => setName(e.target.value)}
+              onChange={e => setName(e.target.value)}
               required
               disabled={loading}
             />
           </div>
-
-          {/* Error Message */}
-          {error && (
-            <div className="text-red-500 text-sm text-center">{error}</div>
-          )}
-
-          {/* Success Message */}
-          {success && (
-            <div className="text-green-600 text-sm text-center">{success}</div>
-          )}
-
-          {/* Submit Button */}
+          {error && <div className="text-red-500 text-sm text-center">{error}</div>}
+          {success && <div className="text-green-600 text-sm text-center">{success}</div>}
+          {resetCode && <div className="text-blue-600 text-sm text-center">Reset Code: {resetCode}</div>}
           <button
             type="submit"
             className="w-full bg-yellow-400 hover:bg-yellow-500 text-blue-900 font-bold py-2 rounded-lg shadow transition disabled:opacity-60"

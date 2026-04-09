@@ -22,7 +22,8 @@ export default function Profile() {
       setError('');
       try {
         const token = localStorage.getItem('token');
-        const res = await axios.get('/api/selfservice/profile', {
+        console.log('TOKEN:', token);
+        const res = await axios.get('http://localhost:5000/api/selfservice/profile', {
           headers: { Authorization: `Bearer ${token}` },
         });
         setUser(res.data);
@@ -40,7 +41,7 @@ export default function Profile() {
     setError('');
     try {
       const token = localStorage.getItem('token');
-      await axios.put('/api/selfservice/profile', { phone }, {
+      await axios.put('http://localhost:5000/api/selfservice/profile', { phone }, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setUser((u) => ({ ...u, phone }));
@@ -57,7 +58,7 @@ export default function Profile() {
       const token = localStorage.getItem('token');
       const form = e.target;
       const wifiPackage = form.package.value;
-      await axios.put('/api/selfservice/wifi-package', { wifiPackage }, {
+      await axios.put('http://localhost:5000/api/selfservice/wifi/package', { wifiPackage }, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setUser((u) => ({ ...u, wifiPackage }));

@@ -11,11 +11,11 @@ export default function AboutUs() {
     <div className="flex flex-col items-center justify-center mt-16">
       <h2 className="text-4xl font-extrabold text-blue-700 mb-4 drop-shadow">About Us</h2>
       <div className="bg-white rounded-lg shadow p-6 max-w-2xl text-center mb-8">
-        <p className="text-lg text-red-600 mb-4">
+        <p className="text-lg text-navyblue-600 font-semibold mb-4">
           <span className="font-bold text-blue-600">Thank you for choosing UIMS!</span><br />
           We are dedicated to providing seamless internet management solutions for ISPs and their customers.
         </p>
-        <p className="text-red-600 mb-2">
+        <p className="text-navyblue-600 font-semibold mb-2">
           <span className="font-semibold">Our Mission:</span> Empower customers and providers with a unified, efficient, and secure platform for all internet service needs.
         </p>
       </div>

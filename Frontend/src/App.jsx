@@ -1,4 +1,3 @@
-import AboutUs from './pages/AboutUs';
 import Dashboard from './pages/Dashboard';
 // Removed Payment import; using PaymentActions instead
 import Chatbot from './pages/Chatbot';
@@ -18,16 +17,30 @@ import PaymentActions from './pages/PaymentActions';
 import MyBalance from './pages/MyBalance';
 import MakePayment from './pages/MakePayment';
 import Profile from './pages/Profile';
+import RoleSelection from './pages/RoleSelection';
+import AdminLogin from './pages/AdminLogin';
+import AdminRegister from './pages/AdminRegister';
+import AdminForgotPassword from './pages/AdminForgotPassword';
+import AdminResetPassword from './pages/AdminResetPassword';
+import AdminDashboard from './pages/AdminDashboard';
+import AdminUsers from './pages/AdminUsers';
+import AdminsManagement from './pages/AdminsManagement';
+import AboutUs from './pages/AboutUs';
+import InteractionLogs from './pages/InteractionLogs';
 
 function App() {
-  // Helper to check if user is logged in
-  const isLoggedIn = Boolean(localStorage.getItem('token'));
   const navigate = useNavigate();
+  const user = localStorage.getItem('user');
+  const admin = localStorage.getItem('admin');
+  const isUserLoggedIn = Boolean(user);
+  const isAdminLoggedIn = Boolean(admin);
 
   const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
-    navigate('/login');
+    localStorage.removeItem('adminToken');
+    localStorage.removeItem('admin');
+    navigate('/'); // Always go to role selection page
   };
 
   return (
@@ -38,13 +51,17 @@ function App() {
           <span className="text-white text-2xl font-extrabold tracking-wide drop-shadow-lg">UIMS Portal</span>
         </div>
         <ul className="flex space-x-6 items-center">
-          <li><Link to="/dashboard" className="bg-red-400 text-white font-bold px-4 py-1 rounded-full shadow hover:bg-red-500 transition">Dashboard</Link></li>
-          {!isLoggedIn ? (
-            <>
-              <li><Link to="/login" className="bg-yellow-300 text-blue-900 font-bold px-4 py-1 rounded-full shadow hover:bg-yellow-400 transition">Login</Link></li>
-              <li><Link to="/register" className="bg-blue-300 text-blue-900 font-bold px-4 py-1 rounded-full shadow hover:bg-blue-400 transition">Register</Link></li>
-            </>
-          ) : (
+          {(isUserLoggedIn || isAdminLoggedIn) && (
+            <li>
+              <Link
+                to={isAdminLoggedIn ? "/admin/dashboard" : "/dashboard"}
+                className="bg-red-400 text-white font-bold px-4 py-1 rounded-full shadow hover:bg-red-500 transition"
+              >
+                Dashboard
+              </Link>
+            </li>
+          )}
+          {(isUserLoggedIn || isAdminLoggedIn) && (
             <li>
               <button
                 onClick={handleLogout}
@@ -58,11 +75,9 @@ function App() {
       </nav>
       {/* Main Content */}
       <Routes>
-        <Route path="/" element={
-          <ProtectedRoute>
-            <AboutUs />
-          </ProtectedRoute>
-        } />
+        <Route path="/" element={<RoleSelection />} />
+        {/* Redirect unknown routes to role selection */}
+        <Route path="*" element={<RoleSelection />} />
         <Route path="/dashboard" element={
           <ProtectedRoute>
             <Dashboard />
@@ -148,6 +163,17 @@ function App() {
             <Profile />
           </ProtectedRoute>
         } />
+        <Route path="/customer/login" element={<Login />} />
+        <Route path="/customer/register" element={<Register />} />
+        <Route path="/admin/login" element={<AdminLogin />} />
+        <Route path="/admin/register" element={<AdminRegister />} />
+        <Route path="/admin/dashboard" element={<AdminDashboard />} />
+        <Route path="/admin/users" element={<AdminUsers />} />
+        <Route path="/admin/admins" element={<AdminsManagement />} />
+        <Route path="/admin/forgot-password" element={<AdminForgotPassword />} />
+        <Route path="/admin/reset-password" element={<AdminResetPassword />} />
+        <Route path="/admin/interactions" element={<InteractionLogs />} />
+        <Route path="/about-us" element={<AboutUs />} />
       </Routes>
     </div>
   );
