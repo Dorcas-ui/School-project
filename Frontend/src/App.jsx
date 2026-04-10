@@ -1,3 +1,5 @@
+import AdminFAQs from './pages/AdminFAQs';
+  <Route path="/admin/faqs" element={<AdminFAQs />} />
 import Dashboard from './pages/Dashboard';
 // Removed Payment import; using PaymentActions instead
 import Chatbot from './pages/Chatbot';

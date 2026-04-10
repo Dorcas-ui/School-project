@@ -6,10 +6,17 @@ export default function Chatbot() {
     { sender: 'bot', text: 'Hello! How can I help you today?' }
   ]);
   const [input, setInput] = useState('');
+  const [showEscalate, setShowEscalate] = useState(false);
+  const [escalateLoading, setEscalateLoading] = useState(false);
+  const [escalateSuccess, setEscalateSuccess] = useState('');
+  const [escalateError, setEscalateError] = useState('');
   const messagesEndRef = useRef(null);
 
   const handleSend = async (e) => {
     e.preventDefault();
+    setShowEscalate(false);
+    setEscalateSuccess('');
+    setEscalateError('');
     if (!input.trim()) return;
     setMessages((msgs) => [...msgs, { sender: 'user', text: input }]);
     const userMsg = input;
@@ -22,8 +29,34 @@ export default function Chatbot() {
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setMessages((msgs) => [...msgs, { sender: 'bot', text: res.data.answer }]);
+      // Show escalate button if fallback message
+      if (res.data.answer && res.data.answer.toLowerCase().includes('sorry, i did not understand your question')) {
+        setShowEscalate(true);
+      }
     } catch (err) {
       setMessages((msgs) => [...msgs, { sender: 'bot', text: 'Sorry, there was a problem connecting to the AI.' }]);
+    }
+  };
+
+  const handleEscalate = async () => {
+    setEscalateLoading(true);
+    setEscalateSuccess('');
+    setEscalateError('');
+    try {
+      const token = localStorage.getItem('token');
+      // Use the last user message for escalation
+      const lastUserMsg = [...messages].reverse().find(m => m.sender === 'user');
+      const res = await axios.post(
+        '/api/human-support/escalate',
+        { message: lastUserMsg?.text || 'User requested escalation.' },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setEscalateSuccess(res.data.message || 'Escalation submitted.');
+      setShowEscalate(false);
+    } catch (err) {
+      setEscalateError('Failed to escalate to human agent.');
+    } finally {
+      setEscalateLoading(false);
     }
   };
 
@@ -45,6 +78,19 @@ export default function Chatbot() {
           ))}
           <div ref={messagesEndRef} />
         </div>
+        {showEscalate && (
+          <div className="mb-4 flex flex-col items-center">
+            <button
+              onClick={handleEscalate}
+              disabled={escalateLoading}
+              className="bg-red-500 hover:bg-red-600 text-white font-bold px-4 py-2 rounded-full shadow mb-2 disabled:opacity-60"
+            >
+              {escalateLoading ? 'Escalating...' : 'Contact Human Agent'}
+            </button>
+            {escalateSuccess && <div className="text-green-600 text-center">{escalateSuccess}</div>}
+            {escalateError && <div className="text-red-600 text-center">{escalateError}</div>}
+          </div>
+        )}
         <form onSubmit={handleSend} className="flex gap-2">
           <input
             type="text"
